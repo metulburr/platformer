@@ -20,41 +20,20 @@ class Player:
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 self.jump()
-                
-    def movementX(self, keys):
+        
+    def update(self, keys):
+        self.rect.clamp_ip(self.screen_rect)
+        self.jump_update()
+            
         if keys[pg.K_d]:
             self.rect.x += self.speed
         if keys[pg.K_a]:
             self.rect.x -= self.speed
         
-    def update(self, keys, blocks):
-        self.rect.clamp_ip(self.screen_rect)
-        self.movementX(keys)
-        
-        if self.in_air:
-            self.fall()
-            if self.rect.bottom >= self.screen_rect.bottom:
-                self.in_air = False
-            for block in blocks:
-                if not self.rect.colliderect(block) and self.rect.bottom < self.screen_rect.bottom:
-                    self.in_air = True
-                elif self.rect.colliderect(block):
-                    if self.rect.bottom >= block.rect.top:
-                        self.in_air = False
-        else:
-            self.y_vel = 0
-
-                    
-    def fall(self):
-        self.y_vel += self.grav
-        self.rect.y += self.y_vel
-            
-
-        
     def render(self, screen):
         screen.blit(self.image, self.rect)
                 
-    '''def jump_update(self):
+    def jump_update(self):
         mouse = pg.mouse.get_pos()
         mouse_to_bottom_offset = self.rect.bottom - mouse[1]
         
@@ -76,7 +55,6 @@ class Player:
                     self.in_air = False
         else:
             self.y_vel = 0
-    '''
         
     def jump(self):
         if not self.in_air:

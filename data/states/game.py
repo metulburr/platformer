@@ -1,8 +1,7 @@
 
 import pygame as pg
-from .. import tools
+from .. import tools, player, block
 import random
-from .. import player
 
 class Game(tools.States):
     def __init__(self, screen_rect): 
@@ -24,6 +23,9 @@ class Game(tools.States):
         pad_right = screen_rect.width - paddle_width - padding
         
         self.player = player.Player(self.screen_rect)
+        self.block = block.Block((100,550,50,25))
+        self.blocks = []
+        self.blocks.append(self.block)
     
     def get_event(self, event, keys):
         if event.type == pg.QUIT:
@@ -43,7 +45,9 @@ class Game(tools.States):
 
     def update(self, now, keys):
         if not self.pause:
-            self.player.update(keys)
+            self.player.update(keys, self.blocks)
+            for block in self.blocks:
+                block.update()
         else:
             self.pause_text, self.pause_rect = self.make_text("PAUSED",
                 (255,255,255), self.screen_rect.center, 50)
@@ -52,6 +56,8 @@ class Game(tools.States):
         screen.fill(self.bg_color)
         screen.blit(self.score_text, self.score_rect)
         self.player.render(screen)
+        for block in self.blocks:
+            block.render(screen)
         if self.pause:
             screen.blit(self.pause_text, self.pause_rect)
         
@@ -76,5 +82,5 @@ class Game(tools.States):
         #self.background_music.setup(self.background_music_volume)
         
     def entry(self):
-        self.mouse_cursor.set_as_lowrect()
+        pass#self.mouse_cursor.set_as_lowrect()
         #pg.mixer.music.play()
