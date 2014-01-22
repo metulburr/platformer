@@ -7,7 +7,7 @@ class Game(tools.States):
     def __init__(self, screen_rect): 
         tools.States.__init__(self)
         self.screen_rect = screen_rect
-        self.score_text, self.score_rect = self.make_text("Jump on your mouse cursor",
+        self.score_text, self.score_rect = self.make_text("Game State",
             (255,255,255), (screen_rect.centerx,100), 30)
         self.pause_text, self.pause_rect = self.make_text("PAUSED",
             (255,255,255), screen_rect.center, 50)
@@ -15,17 +15,11 @@ class Game(tools.States):
         #game specific content
         self.bg_color = (0,0,0)
         self.pause = False
-                
-        paddle_width = 10
-        paddle_height = 100
-        paddle_y = self.screen_rect.centery - (paddle_height // 2)
-        padding = 25 #padding from wall
-        pad_right = screen_rect.width - paddle_width - padding
         
         self.player = player.Player(self.screen_rect)
-        self.block = block.Block((100,550,50,25))
         self.blocks = []
-        self.blocks.append(self.block)
+        self.blocks.append(block.Block((100,550,50,25)))
+        self.blocks.append(block.Block((200,550,50,25)))
     
     def get_event(self, event, keys):
         if event.type == pg.QUIT:

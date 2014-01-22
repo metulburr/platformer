@@ -30,24 +30,26 @@ class Player:
     def update(self, keys, blocks):
         self.rect.clamp_ip(self.screen_rect)
         self.movementX(keys)
+        self.handle_collision(blocks)
         
+    def handle_collision(self, blocks):
         for block in blocks:
             if not self.rect.colliderect(block) and self.rect.bottom < self.screen_rect.bottom:
                 self.in_air = True
+                break
         if self.in_air:
-            self.fall()
+            self.y_vel += self.grav
+            self.rect.y += self.y_vel
             if self.rect.bottom >= self.screen_rect.bottom:
                 self.in_air = False
             for block in blocks:
                 if self.rect.colliderect(block):
                     if self.rect.bottom >= block.rect.top:
                         self.in_air = False
+                        break
         else:
             self.y_vel = 0
-                    
-    def fall(self):
-        self.y_vel += self.grav
-        self.rect.y += self.y_vel
+
         
     def render(self, screen):
         screen.blit(self.image, self.rect)
