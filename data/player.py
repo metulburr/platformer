@@ -31,52 +31,26 @@ class Player:
         self.rect.clamp_ip(self.screen_rect)
         self.movementX(keys)
         
+        for block in blocks:
+            if not self.rect.colliderect(block) and self.rect.bottom < self.screen_rect.bottom:
+                self.in_air = True
         if self.in_air:
             self.fall()
             if self.rect.bottom >= self.screen_rect.bottom:
                 self.in_air = False
             for block in blocks:
-                if not self.rect.colliderect(block) and self.rect.bottom < self.screen_rect.bottom:
-                    self.in_air = True
-                elif self.rect.colliderect(block):
+                if self.rect.colliderect(block):
                     if self.rect.bottom >= block.rect.top:
                         self.in_air = False
         else:
             self.y_vel = 0
-
                     
     def fall(self):
         self.y_vel += self.grav
         self.rect.y += self.y_vel
-            
-
         
     def render(self, screen):
         screen.blit(self.image, self.rect)
-                
-    '''def jump_update(self):
-        mouse = pg.mouse.get_pos()
-        mouse_to_bottom_offset = self.rect.bottom - mouse[1]
-        
-        #stop jumping when mouse is anywhere inside rect, but only used as platform
-        if mouse_to_bottom_offset > 10 and self.rect.collidepoint(mouse) and self.rect.bottom < self.screen_rect.height:
-            self.in_air = True
-
-        #allow fall if mouse moves from under rect
-        if not self.rect.collidepoint(mouse) and self.rect.bottom < self.screen_rect.height:
-            self.in_air = True
-            
-        if self.in_air:
-            self.y_vel += self.grav
-            self.rect.y += self.y_vel
-            if self.rect.bottom >= self.screen_rect.height:
-                self.in_air = False
-            elif self.rect.collidepoint(mouse):
-                if self.rect.bottom >= mouse[1]:
-                    self.in_air = False
-        else:
-            self.y_vel = 0
-    '''
         
     def jump(self):
         if not self.in_air:
