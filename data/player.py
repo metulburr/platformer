@@ -24,7 +24,6 @@ class Player:
     def update(self, keys):
         self.rect.clamp_ip(self.screen_rect)
         self.jump_update()
-        print(self.screen_rect)
             
         if keys[pg.K_d]:
             self.rect.x += self.speed
@@ -36,26 +35,26 @@ class Player:
                 
     def jump_update(self):
         mouse = pg.mouse.get_pos()
+        mouse_to_bottom_offset = self.rect.bottom - mouse[1]
+        
+        #stop jumping when mouse is anywhere inside rect, but only used as platform
+        if mouse_to_bottom_offset > 10 and self.rect.collidepoint(mouse) and self.rect.bottom < self.screen_rect.height:
+            self.in_air = True
+
+        #allow fall if mouse moves from under rect
+        if not self.rect.collidepoint(mouse) and self.rect.bottom < self.screen_rect.height:
+            self.in_air = True
+            
         if self.in_air:
             self.y_vel += self.grav
             self.rect.y += self.y_vel
-            if self.collisionY(mouse):
+            if self.rect.bottom >= self.screen_rect.height:
                 self.in_air = False
+            elif self.rect.collidepoint(mouse):
+                if self.rect.bottom >= mouse[1]:
+                    self.in_air = False
         else:
             self.y_vel = 0
-        
-        #allow fall if mouse moves from under rect
-        if not self.rect.collidepoint(mouse) and self.rect.y < self.screen_rect.height - self.height:
-            self.in_air = True
-                
-    def collisionY(self, mouse):
-        if self.rect.y >= self.screen_rect.height - self.height:
-            return True
-        if self.rect.collidepoint(mouse):
-            if self.rect.y >= mouse[0]:
-                return True
-            else:
-                return False
         
     def jump(self):
         if not self.in_air:

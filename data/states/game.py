@@ -8,8 +8,8 @@ class Game(tools.States):
     def __init__(self, screen_rect): 
         tools.States.__init__(self)
         self.screen_rect = screen_rect
-        self.score_text, self.score_rect = self.make_text("Game State",
-            (255,255,255), (screen_rect.centerx,100), 50)
+        self.score_text, self.score_rect = self.make_text("Jump on your mouse cursor",
+            (255,255,255), (screen_rect.centerx,100), 30)
         self.pause_text, self.pause_rect = self.make_text("PAUSED",
             (255,255,255), screen_rect.center, 50)
         
