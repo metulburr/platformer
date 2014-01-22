@@ -12,7 +12,7 @@ class Player:
         self.rect = self.image.get_rect(bottomleft=starting_loc)
         self.speed = 5
         self.grav = .5
-        self.jumping = False
+        self.in_air = False
         self.y_vel = 0
         self.jump_power = 10
         
@@ -24,6 +24,7 @@ class Player:
     def update(self, keys):
         self.rect.clamp_ip(self.screen_rect)
         self.jump_update()
+        print(self.screen_rect)
             
         if keys[pg.K_d]:
             self.rect.x += self.speed
@@ -34,17 +35,29 @@ class Player:
         screen.blit(self.image, self.rect)
                 
     def jump_update(self):
-        if self.jumping:
+        mouse = pg.mouse.get_pos()
+        if self.in_air:
             self.y_vel += self.grav
             self.rect.y += self.y_vel
-            if self.is_touching_ground():
-                self.jumping = False
+            if self.collisionY(mouse):
+                self.in_air = False
+        else:
+            self.y_vel = 0
+        
+        #allow fall if mouse moves from under rect
+        if not self.rect.collidepoint(mouse) and self.rect.y < self.screen_rect.height - self.height:
+            self.in_air = True
                 
-    def is_touching_ground(self):
-        return self.rect.y >= self.screen_rect.height - self.height
-            
+    def collisionY(self, mouse):
+        if self.rect.y >= self.screen_rect.height - self.height:
+            return True
+        if self.rect.collidepoint(mouse):
+            if self.rect.y >= mouse[0]:
+                return True
+            else:
+                return False
         
     def jump(self):
-        if not self.jumping:
+        if not self.in_air:
             self.y_vel = -self.jump_power
-            self.jumping = True
+            self.in_air = True
