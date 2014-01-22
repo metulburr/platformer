@@ -71,10 +71,10 @@ class Game(tools.States):
         pass
             
     def cleanup(self):
-        pass
+        self.mouse_cursor.set_as_arrow()
         #pg.mixer.music.stop()
         #self.background_music.setup(self.background_music_volume)
         
     def entry(self):
-        pass
+        self.mouse_cursor.set_as_lowrect()
         #pg.mixer.music.play()

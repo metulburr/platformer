@@ -4,6 +4,7 @@
 import pygame as pg
 import os
 import random
+from . import cursor
 
 class Sound:
     def __init__(self, filename):
@@ -59,3 +60,6 @@ class States:
         self.text_basic_color = (255,255,255)
         self.text_hover_color = (255,0,0)
         self.text_color = self.text_basic_color 
+        
+        self.mouse_cursor = cursor.Cursor()
+        self.mouse_cursor.set_as_arrow()
