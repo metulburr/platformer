@@ -1,13 +1,13 @@
 import pygame as pg
-from .. import tools, player, block
+from .. import tools, player, block, powerup
 import random
 
 class Game(tools.States):
     def __init__(self, screen_rect):
         tools.States.__init__(self)
         self.screen_rect = screen_rect
-        self.score_text, self.score_rect = self.make_text("Game State",
-            (255,255,255), (screen_rect.centerx,100), 30)
+        #self.score_text, self.score_rect = self.make_text("",
+        #    (255,255,255), (screen_rect.centerx,100), 30)
         self.pause_text, self.pause_rect = self.make_text("PAUSED",
             (255,255,255), screen_rect.center, 50)
 
@@ -15,13 +15,33 @@ class Game(tools.States):
         self.bg_color = (0,0,0)
         self.pause = False
 
+        
         self.player = player.Player(self.screen_rect)
+        self.reset_level()
+        
+    def reset_level(self):
         self.blocks = []
-        self.blocks.append(block.Block((100,550,50,25)))
-        self.blocks.append(block.Block((200,550,50,25)))
-        self.blocks.append(block.Block((325,500,50,25)))
-        self.blocks.append(block.Block((450,450,50,25)))
-        self.blocks.append(block.Block((0,600,800,20)))
+        step_top = ((self.screen_rect.bottom - 20) - 75) - 25#bottom screen - floor - player height - platform hieght
+        self.blocks.append(block.Block((100,step_top-75,50,25)))
+        self.blocks.append(block.Block((200,step_top,50,25)))
+        self.blocks.append(block.Block((300,step_top-150,50,25)))
+        self.blocks.append(block.Block((self.screen_rect.right-50,step_top+65,50,25)))
+        self.blocks.append(block.Block((0,580,800,20)))
+        
+        self.powerups = []
+
+        self.powerups.append(powerup.PowerUp((125,step_top-10, 15,15)))
+        self.powerups.append(powerup.PowerUp((425,step_top+10, 15,15)))
+        self.powerups.append(powerup.PowerUp((500,step_top+10, 15,15)))
+        self.powerups.append(powerup.PowerUp((580,step_top+10, 15,15)))
+        self.powerups.append(powerup.PowerUp((self.screen_rect.right-30,step_top-25, 15,15),5))
+        self.powerups.append(powerup.PowerUp((325,step_top-225,15,15)))
+        
+        self.score_text, self.score_rect = self.make_text("",
+            (255,255,255), (self.screen_rect.centerx,100), 30)
+        self.player.reset()
+        self.player.reset_position()
+
 
     def get_event(self, event, keys):
         if event.type == pg.QUIT:
@@ -34,16 +54,17 @@ class Game(tools.States):
             elif event.key == pg.K_p:
                 self.pause = not self.pause
         self.player.get_event(event, keys)
-        #elif event.type == self.background_music.track_end:
-        #    self.background_music.track = (self.background_music.track+1) % len(self.background_music.tracks)
-        #    pg.mixer.music.load(self.background_music.tracks[self.background_music.track])
-        #    pg.mixer.music.play()
 
     def update(self, now, keys):
         if not self.pause:
             self.player.update(keys, self.blocks)
             for block in self.blocks:
                 block.update()
+            for up in self.powerups[:]:
+                remove = up.update(self.player)
+                if remove:
+                    #print('jump power increased to {}'.format(self.player.jump_power))
+                    self.powerups.remove(up)
         else:
             self.pause_text, self.pause_rect = self.make_text("PAUSED",
                 (255,255,255), self.screen_rect.center, 50)
@@ -54,6 +75,11 @@ class Game(tools.States):
         self.player.render(screen)
         for block in self.blocks:
             block.render(screen)
+        for up in self.powerups:
+            up.render(screen)
+        if not self.powerups:
+            self.score_text, self.score_rect = self.make_text("Complete",
+                (255,255,255), (self.screen_rect.centerx,100), 30)
         if self.pause:
             screen.blit(self.pause_text, self.pause_rect)
 
@@ -73,10 +99,7 @@ class Game(tools.States):
         pass
 
     def cleanup(self):
-        self.mouse_cursor.set_as_arrow()
-        #pg.mixer.music.stop()
-        #self.background_music.setup(self.background_music_volume)
+        self.reset_level()
 
     def entry(self):
-        pass#self.mouse_cursor.set_as_lowrect()
-        #pg.mixer.music.play()
+        pass#

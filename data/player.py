@@ -1,19 +1,21 @@
 import pygame as pg
+from . import shared
 
-class Player:
+class Player(shared.Shared):
     def __init__(self, screen_rect):
+        shared.Shared.__init__(self)
         self.screen_rect = screen_rect
         self.width = 50
         self.height = 75
         self.image = pg.Surface([self.width, self.height])
         self.image.fill((0,0,255))
-        starting_loc = (0, screen_rect.height)
-        self.rect = self.image.get_rect(bottomleft=starting_loc)
-        self.speed = 5
+        self.rect = self.image.get_rect(bottomleft=self.starting_loc)
         self.grav = .5
         self.in_air = False
         self.y_vel = 0
-        self.jump_power = 10
+        
+    def reset_position(self):
+        self.rect = self.image.get_rect(bottomleft=self.starting_loc)
 
     def get_event(self, event, keys):
         if event.type == pg.KEYDOWN:
