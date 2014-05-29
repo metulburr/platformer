@@ -1,0 +1,7 @@
+{
+    'fullscreen':,
+    'difficulty':difficulty,
+    'size'      :[500,600],
+    'caption'   :"Flood It",
+    'resizable' :False,
+}

@@ -1,0 +1,27 @@
+import json
+import os
+
+class Database:
+	def __init__(self, default={}):
+		self.filename = 'settings.dat'
+		if not os.path.exists(self.filename):
+			self.save(dict())
+	def load(self):
+		json_data = open(self.filename)
+		obj = json.load(json_data)
+		json_data.close()
+		return obj
+	def save(self, obj):
+		f = open(self.filename, 'w')
+		f.write(json.dumps(obj))
+		f.close()
+
+if __name__ == '__main__':
+	data = JSON()
+	j = data.load()
+	print(j)
+	
+	obj = {}
+	obj['key'] = 'value'
+	
+	data.save(obj)

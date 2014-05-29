@@ -2,75 +2,75 @@
 
 import pygame as pg
 from .. import tools
+from ..toolbox import button, roundrects
 import random
 
 class Menu(tools.States):
     def __init__(self, screen_rect):
         tools.States.__init__(self)
         self.screen_rect = screen_rect
-        self.options = ['Play', 'Quit']
-        self.next_list = ['GAME']
-        self.title, self.title_rect = self.make_text('Menu State', (75,75,75), (self.screen_rect.centerx, 75), 150)
+        self.options = ['Play', 'Options', 'Quit']
+        self.next_list = ['GAME', 'OPTIONS']
         self.pre_render_options()
-        self.from_bottom = 200
-        self.spacer = 75
+        self.from_bottom = 300
+        self.spacer = 35
+
+        #self.bg_orig = tools.Image.load('bg.png')
+        #self.bg = pg.transform.scale(self.bg_orig, (self.screen_rect.width, self.screen_rect.height))
+        #self.bg_rect = self.bg.get_rect(center=self.screen_rect.center)
+        
+        self.menu_item_bg_w = 200
+        self.menu_item_bg_h = 25
+
+    def render_cursor(self, screen):
+        mouseX, mouseY = pg.mouse.get_pos()
+        self.cursor_rect = self.cursor.get_rect(center=(mouseX+10, mouseY+13))
+        screen.blit(self.cursor, self.cursor_rect)
 
     def get_event(self, event, keys):
         if event.type == pg.QUIT:
             self.quit = True
-        elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-            for i,opt in enumerate(self.rendered["des"]):
-                if opt[1].collidepoint(pg.mouse.get_pos()):
-                    if i == len(self.next_list):
-                        self.quit = True
-                    else:
-                        self.button_sound.sound.play()
-                        self.next = self.next_list[i]
-                        self.done = True
-                    break
+        elif event.type == pg.KEYDOWN:
+            if event.key in [pg.K_UP, pg.K_w]:
+                self.change_selected_option(-1)
+            elif event.key in [pg.K_DOWN, pg.K_s]:
+                self.change_selected_option(1)
+                
+            elif event.key == pg.K_RETURN:
+                self.select_option(self.selected_index)
+        #elif event.type == self.intro.track_end:
+        #    self.intro.track = (self.intro.track+1) % len(self.intro.tracks)
+        #    pg.mixer.music.load(self.intro.tracks[self.intro.track]) 
+
+        self.mouse_menu_click(event)
 
     def update(self, now, keys):
-        pg.mouse.set_visible(True)
-        if self.quit:
-            return True
+        self.mouse_hover_sound()
+        self.change_selected_option()
 
     def render(self, screen):
-        screen.fill(self.bg_color)
-        screen.blit(self.title,self.title_rect)
+        screen.fill((0,0,0))
+        #screen.blit(self.bg, self.bg_rect)
         for i,opt in enumerate(self.rendered["des"]):
-            opt[1].center = (self.screen_rect.centerx, self.from_bottom+i*self.spacer)
-            if opt[1].collidepoint(pg.mouse.get_pos()):
+            aligned_center = (self.screen_rect.centerx, self.from_bottom+i*self.spacer)
+            
+            #for option in self.options:
+            #    w = self.menu_item_bg_w
+            #    h = self.menu_item_bg_h
+            #    roundrects.round_rect(screen, (aligned_center[0]-(w//2), aligned_center[1]-(h//2),w,h), (0,0,0), 5, 2, (50,50,50))
+            opt[1].center =  aligned_center
+            if i == self.selected_index:
                 rend_img,rend_rect = self.rendered["sel"][i]
                 rend_rect.center = opt[1].center
                 screen.blit(rend_img,rend_rect)
             else:
-                screen.blit(opt[0],opt[1])
+                rect = opt[1]
+                screen.blit(opt[0],rect)
         
-    def make_text(self,message,color,center,size):
-        font = tools.Font.load('arial.ttf', size)
-        text = font.render(message,True,color)
-        rect = text.get_rect(center=center)
-        return text,rect
-        
-    def pre_render_options(self):
-        font_deselect = tools.Font.load('arial.ttf', 50)
-        font_selected = tools.Font.load('arial.ttf', 75)
-
-        rendered_msg = {"des":[],"sel":[]}
-        for option in self.options:
-            d_rend = font_deselect.render(option, 1, (255,255,255))
-            d_rect = d_rend.get_rect()
-            s_rend = font_selected.render(option, 1, (255,0,0))
-            s_rect = s_rend.get_rect()
-            rendered_msg["des"].append((d_rend,d_rect))
-            rendered_msg["sel"].append((s_rend,s_rect))
-        self.rendered = rendered_msg
-        
-    def const_event(self, keys):
-        pass
         
     def cleanup(self):
         pass
         
     def entry(self):
         pass
+

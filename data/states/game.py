@@ -48,7 +48,7 @@ class Game(tools.States):
             self.quit = True
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                self.button_sound.sound.play()
+                self.button_click.sound.play()
                 self.done = True
                 self.next = 'MENU'
             elif event.key == pg.K_p:
@@ -84,7 +84,7 @@ class Game(tools.States):
             screen.blit(self.pause_text, self.pause_rect)
 
     def make_text(self,message,color,center,size):
-        font = tools.Font.load('arial.ttf', size)
+        font = tools.Font.load('impact.ttf', size)
         text = font.render(message,True,color)
         rect = text.get_rect(center=center)
         return text,rect
