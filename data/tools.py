@@ -30,7 +30,6 @@ class DB:
     def remove():
         if os.path.exists(DB.path):
             os.remove(DB.path)
-    
         
 class Image:
     path = os.path.join('resources', 'graphics')

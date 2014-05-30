@@ -1,15 +1,39 @@
 import pygame as pg
-from .. import tools, player, block, powerup
+from .. import tools, player, block, powerup, renderer
 import random
 
+class Level:
+    def __init__(self, screen):
+        self.screen = screen
+        self.renderer = renderer.Renderer('level.tmx')
+        self.full_map = self.renderer.make_map()
+        self.viewport = self.make_viewport(self.full_map)
+        self.level_surface = self.make_level_surface(self.full_map)
+        
+    def make_level_surface(self, full_map):
+        map_rect = full_map.get_rect()
+        map_width = map_rect.width
+        map_height = map_rect.height
+        size = map_width, map_height
+        return pg.Surface(size).convert()
+        
+    def make_viewport(self, map_image):
+        map_rect = map_image.get_rect()
+        return self.screen.get_rect(bottom=map_rect.bottom)
+        
+    def render(self, screen):
+        self.level_surface.blit(self.full_map, self.viewport, self.viewport)
+        screen.blit(self.level_surface, (0,0), self.viewport)
+
 class Game(tools.States):
-    def __init__(self, screen_rect):
+    def __init__(self, screen):
         tools.States.__init__(self)
-        self.screen_rect = screen_rect
+        self.screen = screen
+        self.screen_rect = self.screen.get_rect()
         #self.score_text, self.score_rect = self.make_text("",
         #    (255,255,255), (screen_rect.centerx,100), 30)
         self.pause_text, self.pause_rect = self.make_text("PAUSED",
-            (255,255,255), screen_rect.center, 50)
+            (255,255,255), self.screen_rect.center, 50)
 
         #game specific content
         self.bg_color = (0,0,0)
@@ -18,6 +42,9 @@ class Game(tools.States):
         
         self.player = player.Player(self.screen_rect)
         self.reset_level()
+        
+        
+        self.level = Level(self.screen)
         
     def reset_level(self):
         self.blocks = []

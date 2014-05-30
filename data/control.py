@@ -30,7 +30,7 @@ class Control():
             "MENU"     : menu.Menu(self.screen_rect),
             "SPLASH"   : splash.Splash(self.screen_rect),
             'TITLE'    : title.Title(self.screen_rect),
-            'GAME'     : game.Game(self.screen_rect),
+            'GAME'     : game.Game(self.screen),
             'OPTIONS'  : options.Options(self.screen_rect, self.default_screensize, self.fullscreen),
         }
 
