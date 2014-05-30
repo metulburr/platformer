@@ -98,6 +98,7 @@ class Game(tools.States):
 
     def render(self, screen):
         screen.fill(self.bg_color)
+        self.level.render(screen)
         screen.blit(self.score_text, self.score_rect)
         self.player.render(screen)
         for block in self.blocks:
