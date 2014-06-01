@@ -1,39 +1,18 @@
 import pygame as pg
-from .. import tools, player, block, powerup, renderer
+from .. import tools, player, block, powerup, TMXLoader
 import random
+from xml import sax
 
-class Level:
-    def __init__(self, screen):
-        self.screen = screen
-        self.renderer = renderer.Renderer('level.tmx')
-        self.full_map = self.renderer.make_map()
-        self.viewport = self.make_viewport(self.full_map)
-        self.level_surface = self.make_level_surface(self.full_map)
-        
-    def make_level_surface(self, full_map):
-        map_rect = full_map.get_rect()
-        map_width = map_rect.width
-        map_height = map_rect.height
-        size = map_width, map_height
-        return pg.Surface(size).convert()
-        
-    def make_viewport(self, map_image):
-        map_rect = map_image.get_rect()
-        return self.screen.get_rect(bottom=map_rect.bottom)
-        
-    def render(self, screen):
-        self.level_surface.blit(self.full_map, self.viewport, self.viewport)
-        screen.blit(self.level_surface, (0,0), self.viewport)
+
 
 class Game(tools.States):
-    def __init__(self, screen):
+    def __init__(self, screen_rect):
         tools.States.__init__(self)
-        self.screen = screen
-        self.screen_rect = self.screen.get_rect()
+        self.screen_rect = screen_rect
         #self.score_text, self.score_rect = self.make_text("",
         #    (255,255,255), (screen_rect.centerx,100), 30)
         self.pause_text, self.pause_rect = self.make_text("PAUSED",
-            (255,255,255), self.screen_rect.center, 50)
+            (255,255,255), screen_rect.center, 50)
 
         #game specific content
         self.bg_color = (0,0,0)
@@ -43,8 +22,10 @@ class Game(tools.States):
         self.player = player.Player(self.screen_rect)
         self.reset_level()
         
-        
-        self.level = Level(self.screen)
+        self.parser = sax.make_parser()
+        self.tmx = TMXLoader.TMXHandler(debug=True)
+        self.parser.setContentHandler(self.tmx)
+        self.parser.parse(tools.TMX.load('test2.tmx'))
         
     def reset_level(self):
         self.blocks = []
@@ -98,7 +79,7 @@ class Game(tools.States):
 
     def render(self, screen):
         screen.fill(self.bg_color)
-        self.level.render(screen)
+        screen.blit(self.tmx.image, (0,0))
         screen.blit(self.score_text, self.score_rect)
         self.player.render(screen)
         for block in self.blocks:
