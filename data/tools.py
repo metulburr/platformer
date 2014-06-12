@@ -6,12 +6,14 @@ import shutil
 import random
 import sys
 import json
+from . import tmx
         
 class DB:
     dirname = 'save'
     if not os.path.exists(dirname):
         os.mkdir(dirname)
     path = os.path.join(dirname, 'database{}'.format(sys.version.split()[0]))
+    #key = 'database'
     @staticmethod
     def exists():
         return os.path.exists(DB.path)
@@ -26,13 +28,12 @@ class DB:
         f = open(DB.path, 'w')
         f.write(json.dumps(obj))
         f.close()
+
+class TMX:
+    path = os.path.join('resources', 'tmx')
     @staticmethod
-    def remove():
-        if os.path.exists(DB.path):
-            os.remove(DB.path)
-
-
-####
+    def load(filename, screensize):
+        return tmx.load(os.path.join(TMX.path, filename), screensize)
         
 class Image:
     path = os.path.join('resources', 'graphics')
@@ -40,14 +41,6 @@ class Image:
     def load(filename):
         p = os.path.join(Image.path, filename)
         return pg.image.load(os.path.abspath(p))
-
-class TMX:
-    path = os.path.join('resources', 'tmx')
-    @staticmethod
-    def load(filename):
-        p = os.path.join(TMX.path, filename)
-        print(os.path.abspath(p))
-        return os.path.abspath(p)
 
 class Font:
     path = os.path.join('resources', 'fonts')
@@ -83,8 +76,6 @@ class Music:
         pg.mixer.music.set_volume(self.volume)
         pg.mixer.music.set_endevent(self.track_end)
         pg.mixer.music.load(os.path.join(self.path, self.song))
-
-####
 
 class States:
     def __init__(self):     
@@ -225,6 +216,7 @@ def clean_files():
                 path = os.path.join(root, name)
                 print('removing {}'.format(os.path.abspath(path)))
                 os.remove(path)
+
 
 class TextRectException:
     def __init__(self, message = None):

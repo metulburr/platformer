@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="110" height="100" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="tile_set" tilewidth="16" tileheight="16">
+  <image source="../graphics/tile_set.png" width="528" height="448"/>
+ </tileset>
+ <tileset firstgid="925" name="triggers16" tilewidth="16" tileheight="16">
+  <image source="../graphics/triggers16.png" width="96" height="16"/>
+  <tile id="0">
+   <properties>
+    <property name="player" value="yes"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="enemy" value="yes"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="exit" value="yes"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="reverse" value="yes"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="110" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztw7EJAAAIA7Di/0f7QkeRBJIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8NMfSWRP/AEk=
+  </data>
+ </layer>
+ <objectgroup color="#a40000" name="triggers" width="110" height="100" visible="0">
+  <object name="tlrb" x="0" y="1584" width="576" height="16">
+   <properties>
+    <property name="blockers" value="tlrb"/>
+   </properties>
+  </object>
+  <object gid="925" x="48" y="1552"/>
+  <object gid="928" x="160" y="1568"/>
+  <object gid="928" x="448" y="1568"/>
+  <object gid="926" x="400" y="1568"/>
+  <object gid="926" x="224" y="1568"/>
+ </objectgroup>
+</map>

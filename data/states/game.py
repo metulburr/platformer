@@ -1,114 +1,167 @@
+
+
 import pygame as pg
-from .. import tools, player, block, powerup, TMXLoader
+from .. import tools
+import os
 import random
-from xml import sax
+from .. import tmx
 
+class Enemy(pg.sprite.Sprite):
+    #image = pg.image.load('enemy.png')
+    image = tools.Image.load('enemy.png')
+    def __init__(self, location, *groups):
+        super(Enemy, self).__init__(*groups)
+        self.rect = pg.rect.Rect(location, self.image.get_size())
+        self.direction = 1
 
+    def update(self, dt, game):
+        self.rect.x += self.direction * 100 * dt
+        for cell in game.tilemap.layers['triggers'].collide(self.rect, 'reverse'):
+            if self.direction > 0:
+                self.rect.right = cell.left
+            else:
+                self.rect.left = cell.right
+            self.direction *= -1
+            break
+        if self.rect.colliderect(game.player.rect):
+            game.player.is_dead = True
+
+class Bullet(pg.sprite.Sprite):
+    #image = pg.image.load('bullet.png')
+    image = tools.Image.load('bullet.png')
+    def __init__(self, location, direction, *groups):
+        super(Bullet, self).__init__(*groups)
+        self.rect = pg.rect.Rect(location, self.image.get_size())
+        self.direction = direction
+        self.lifespan = 1
+
+    def update(self, dt, game):
+        self.lifespan -= dt
+        if self.lifespan < 0:
+            self.kill()
+            return
+        self.rect.x += self.direction * 400 * dt
+
+        if pg.sprite.spritecollide(self, game.enemies, True):
+            self.kill()
+
+class Player(pg.sprite.Sprite):
+    def __init__(self, location, *groups):
+        super(Player, self).__init__(*groups)
+        #self.image = pg.image.load('player-right.png')
+        self.image = tools.Image.load('player-right.png')
+        self.right_image = self.image
+        #self.left_image = pg.image.load('player-left.png')
+        self.left_image = tools.Image.load('player-left.png')
+        self.rect = pg.rect.Rect(location, self.image.get_size())
+        self.resting = False
+        self.dy = 0
+        self.is_dead = False
+        self.direction = 1
+        self.gun_cooldown = 0
+
+    def update(self, dt, game):
+        last = self.rect.copy()
+
+        key = pg.key.get_pressed()
+        if key[pg.K_LEFT]:
+            self.rect.x -= 300 * dt
+            self.image = self.left_image
+            self.direction = -1
+        if key[pg.K_RIGHT]:
+            self.rect.x += 300 * dt
+            self.image = self.right_image
+            self.direction = 1
+
+        if key[pg.K_LSHIFT] and not self.gun_cooldown:
+            if self.direction > 0:
+                Bullet(self.rect.midright, 1, game.sprites)
+            else:
+                Bullet(self.rect.midleft, -1, game.sprites)
+            self.gun_cooldown = 1
+
+        self.gun_cooldown = max(0, self.gun_cooldown - dt)
+
+        if self.resting and key[pg.K_SPACE]:
+            self.dy = -500
+        self.dy = min(400, self.dy + 40)
+
+        self.rect.y += self.dy * dt
+
+        new = self.rect
+        self.resting = False
+        for cell in game.tilemap.layers['triggers'].collide(new, 'blockers'):
+            blockers = cell['blockers']
+            if 'l' in blockers and last.right <= cell.left and new.right > cell.left:
+                new.right = cell.left
+            if 'r' in blockers and last.left >= cell.right and new.left < cell.right:
+                new.left = cell.right
+            if 't' in blockers and last.bottom <= cell.top and new.bottom > cell.top:
+                self.resting = True
+                new.bottom = cell.top
+                self.dy = 0
+            if 'b' in blockers and last.top >= cell.bottom and new.top < cell.bottom:
+                new.top = cell.bottom
+                self.dy = 0
+
+        game.tilemap.set_focus(new.x, new.y)
 
 class Game(tools.States):
-    def __init__(self, screen_rect):
+    def __init__(self, screen_rect): 
         tools.States.__init__(self)
         self.screen_rect = screen_rect
-        #self.score_text, self.score_rect = self.make_text("",
-        #    (255,255,255), (screen_rect.centerx,100), 30)
-        self.pause_text, self.pause_rect = self.make_text("PAUSED",
-            (255,255,255), screen_rect.center, 50)
+        self.overlay_bg = pg.Surface((screen_rect.width, screen_rect.height))
+        self.overlay_bg.fill(0)
+        self.overlay_bg.set_alpha(200)
+        self.bg_color = (255,255,255)
 
-        #game specific content
-        self.bg_color = (0,0,0)
-        self.pause = False
+        self.timer = 0
 
+        self.overlay = pg.Surface((screen_rect.width, screen_rect.height))
+        self.overlay.fill(0)
+        self.overlay.set_alpha(200)
         
-        self.player = player.Player(self.screen_rect)
-        self.reset_level()
+        self.sprites = tmx.SpriteLayer()
+        self.tilemap = tools.TMX.load('test.tmx', self.screen_rect.size)
+        start_cell = self.tilemap.layers['triggers'].find('player')[0]
+        self.player = Player((start_cell.px, start_cell.py), self.sprites)
+        self.tilemap.layers.append(self.sprites)
         
-        self.parser = sax.make_parser()
-        self.tmx = TMXLoader.TMXHandler(debug=True)
-        self.parser.setContentHandler(self.tmx)
-        self.parser.parse(tools.TMX.load('test2.tmx'))
+        self.enemies = tmx.SpriteLayer()
+        for enemy in self.tilemap.layers['triggers'].find('enemy'):
+            Enemy((enemy.px, enemy.py), self.enemies)
+        self.tilemap.layers.append(self.enemies)
         
-    def reset_level(self):
-        self.blocks = []
-        step_top = ((self.screen_rect.bottom - 20) - 75) - 25#bottom screen - floor - player height - platform hieght
-        self.blocks.append(block.Block((100,step_top-75,50,25)))
-        self.blocks.append(block.Block((200,step_top,50,25)))
-        self.blocks.append(block.Block((300,step_top-150,50,25)))
-        self.blocks.append(block.Block((self.screen_rect.right-50,step_top+65,50,25)))
-        self.blocks.append(block.Block((0,580,800,20)))
         
-        self.powerups = []
-
-        self.powerups.append(powerup.PowerUp((125,step_top-10, 15,15)))
-        self.powerups.append(powerup.PowerUp((425,step_top+10, 15,15)))
-        self.powerups.append(powerup.PowerUp((500,step_top+10, 15,15)))
-        self.powerups.append(powerup.PowerUp((580,step_top+10, 15,15)))
-        self.powerups.append(powerup.PowerUp((self.screen_rect.right-30,step_top-25, 15,15),5))
-        self.powerups.append(powerup.PowerUp((325,step_top-225,15,15)))
-        
-        self.score_text, self.score_rect = self.make_text("",
-            (255,255,255), (self.screen_rect.centerx,100), 30)
-        self.player.reset()
-        self.player.reset_position()
-
-
     def get_event(self, event, keys):
         if event.type == pg.QUIT:
             self.quit = True
         elif event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
+            if event.key == self.keybinding['back']:
                 self.button_click.sound.play()
                 self.done = True
                 self.next = 'MENU'
-            elif event.key == pg.K_p:
-                self.pause = not self.pause
-        self.player.get_event(event, keys)
-
-    def update(self, now, keys):
-        if not self.pause:
-            self.player.update(keys, self.blocks)
-            for block in self.blocks:
-                block.update()
-            for up in self.powerups[:]:
-                remove = up.update(self.player)
-                if remove:
-                    #print('jump power increased to {}'.format(self.player.jump_power))
-                    self.powerups.remove(up)
-        else:
-            self.pause_text, self.pause_rect = self.make_text("PAUSED",
-                (255,255,255), self.screen_rect.center, 50)
-
+                
+        #elif event.type == self.bg_music.track_end:
+        #    self.bg_music.track = (self.bg_music.track+1) % len(self.bg_music.tracks)
+        #    pg.mixer.music.load(self.bg_music.tracks[self.bg_music.track]) 
+        #    pg.mixer.music.play()
+                    
+    def update(self, now, keys, dt):
+        if pg.time.get_ticks()-self.timer > 1000:
+            self.timer = pg.time.get_ticks()
+        self.tilemap.update(dt / 1000., self)
+        if self.player.is_dead:
+            print('YOU DIED')
+            self.quit = True
+        
     def render(self, screen):
-        screen.fill(self.bg_color)
-        screen.blit(self.tmx.image, (0,0))
-        screen.blit(self.score_text, self.score_rect)
-        self.player.render(screen)
-        for block in self.blocks:
-            block.render(screen)
-        for up in self.powerups:
-            up.render(screen)
-        if not self.powerups:
-            self.score_text, self.score_rect = self.make_text("Complete",
-                (255,255,255), (self.screen_rect.centerx,100), 30)
-        if self.pause:
-            screen.blit(self.pause_text, self.pause_rect)
+        screen.fill((self.bg_color))
+        self.tilemap.draw(screen)
 
-    def make_text(self,message,color,center,size):
-        font = tools.Font.load('impact.ttf', size)
-        text = font.render(message,True,color)
-        rect = text.get_rect(center=center)
-        return text,rect
-
-    def adjust_score(self, hit_side):
-        if hit_side == -1:
-            self.score[1] += 1
-        elif hit_side == 1:
-            self.score[0] += 1
-
-    def const_event(self, keys):
-        pass
 
     def cleanup(self):
-        self.reset_level()
-
+        pass
+        
     def entry(self):
-        pass#
+        pass

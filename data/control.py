@@ -36,6 +36,7 @@ class Control():
 
         self.state_name = "SPLASH"
         self.state = self.state_dict[self.state_name]
+        self.dt = 0
             
     def check_display_change(self):
         if self.state.change_res:
@@ -96,9 +97,9 @@ class Control():
             now = pg.time.get_ticks()
             self.event_loop()
             self.change_state()
-            self.state.update(now, self.keys)
+            self.state.update(now, self.keys, self.dt)
             self.state.render(self.screen)
             pg.display.update()
-            self.clock.tick(self.fps)
+            self.dt = self.clock.tick(self.fps)
 
 

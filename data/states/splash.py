@@ -32,7 +32,7 @@ class Splash(tools.States):
         selected_font = tools.Font.load('impact.ttf', size)
         return selected_font.render(msg,1,color)
 
-    def update(self,surface,keys):
+    def update(self,surface,keys,dt):
         self.current_time = pg.time.get_ticks()
         self.cover.set_alpha(self.cover_alpha)
         self.cover_alpha = max(self.cover_alpha-self.alpha_step,0)

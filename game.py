@@ -10,7 +10,7 @@ from data.tools import DB
 DEFAULT = { 
         'fullscreen':False,
         'difficulty':'medium',
-        'size'      :(800,600),
+        'size'      :(500, 400),
         'caption'   :'Flood It',
         'resizable' :False,
         'save':{
@@ -24,15 +24,11 @@ DEFAULT = {
 parser = argparse.ArgumentParser(description='{} Arguments'.format(DEFAULT['caption']))
 parser.add_argument('-c','--clean', action='store_true', 
     help='Remove all .pyc files and __pycache__ directories')
-parser.add_argument('-r','--remove_save', action='store_true', 
-    help='Remove save directory recursively')
 args = vars(parser.parse_args())
 
 if __name__ == '__main__':
     if args['clean']:
         data.tools.clean_files()
-    elif args['remove_save']:
-        DB.remove()
     else:
         if not DB.exists():
             DB.save(DEFAULT)

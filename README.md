@@ -1,3 +1,8 @@
+[![Logo](http://i.imgur.com/5ZSGT2V.png)](http://i.imgur.com/5ZSGT2V.png
+http://www.pygame.org/project-Flood+It-2896-4729.html
+
+###How to Play
+Starting with the color of the topleft most block, The goal is to change the entire board to one color within 25 turns. Each turn you choose the next color to switch to correpsonding to neighboring blocks.
 
 ###arguments
 run game with defaults

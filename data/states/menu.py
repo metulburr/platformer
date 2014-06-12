@@ -44,7 +44,7 @@ class Menu(tools.States):
 
         self.mouse_menu_click(event)
 
-    def update(self, now, keys):
+    def update(self, now, keys, dt):
         self.mouse_hover_sound()
         self.change_selected_option()
 
