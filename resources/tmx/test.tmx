@@ -28,7 +28,7 @@
  </tileset>
  <layer name="Tile Layer 1" width="110" height="100">
   <data encoding="base64" compression="zlib">
-   eJztw7EJAAAIA7Di/0f7QkeRBJIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8NMfSWRP/AEk=
+   eJztw8EJADAIBLDDUbr/kH4cwGeRBJIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJe8CUBSn2WnAeG2AI0=
   </data>
  </layer>
  <objectgroup color="#a40000" name="triggers" width="110" height="100" visible="0">
@@ -42,5 +42,10 @@
   <object gid="928" x="448" y="1568"/>
   <object gid="926" x="400" y="1568"/>
   <object gid="926" x="224" y="1568"/>
+  <object name="t" x="80" y="1536" width="32" height="16">
+   <properties>
+    <property name="blockers" value="t"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

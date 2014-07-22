@@ -1,2 +1,0 @@
-
-TMX = "resources/tmx"
